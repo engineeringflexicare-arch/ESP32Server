@@ -56,10 +56,11 @@ const getAllConfigs = async (req, res) => {
 // ==========================================
 // Create / Update Config
 // ==========================================
-
+// deviceController.js හි setConfig function එක
 const setConfig = async (req, res) => {
   try {
-    const { device_id, firebase_api_key, firebase_url } = req.body;
+    // අලුත් fields ටික req.body එකෙන් ගන්න
+    const { device_id, firebase_api_key, firebase_url, ip_address, gateway, subnet } = req.body;
 
     const config = await ConfigurationModel.findOneAndUpdate(
       { device_id },
@@ -67,6 +68,9 @@ const setConfig = async (req, res) => {
         device_id,
         firebase_api_key,
         firebase_url,
+        ip_address, // අලුතින් එකතු කළා
+        gateway, // අලුතින් එකතු කළා
+        subnet, // අලුතින් එකතු කළා
         updatedAt: new Date(),
       },
       {
@@ -86,7 +90,6 @@ const setConfig = async (req, res) => {
     });
   }
 };
-
 // ==========================================
 // Save Log Event
 // ==========================================
