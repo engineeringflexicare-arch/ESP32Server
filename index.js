@@ -1,24 +1,100 @@
+require("dotenv").config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config();
 
-// ඔබගේ අලුත් API Routes ගොනුව මෙතැනින් ලබාගන්න
 const apiRoutes = require("./routes/apiRoutes");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+// ==========================================
+// Middleware
+// ==========================================
 
-// API Routes මෙතැනින් සම්බන්ධ වේ
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      console.log("Origin:", origin);
+
+      callback(null, true);
+    },
+    credentials: true,
+  }),
+);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ==========================================
+// Request Logger
+// ==========================================
+
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// ==========================================
+// Health Check
+// ==========================================
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "ESP32 MongoDB Server Running",
+  });
+});
+
+// ==========================================
+// API Routes
+// ==========================================
+
 app.use("/api", apiRoutes);
 
-// MongoDB Connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+// ==========================================
+// 404 Handler
+// ==========================================
 
-// සර්වර් එක ආරම්භ කිරීම
-app.listen(5000, "0.0.0.0", () => console.log("🚀 Server running on port 5000"));
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
+});
+
+// ==========================================
+// Error Handler
+// ==========================================
+
+app.use((err, req, res, next) => {
+  console.error("❌ Server Error:", err);
+
+  res.status(500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
+});
+
+// ==========================================
+// MongoDB Connection
+// ==========================================
+
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI;
+
+mongoose
+  .connect(MONGO_URI)
+  .then(() => {
+    console.log("✅ MongoDB Connected");
+
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log("================================");
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🌍 http://localhost:${PORT}`);
+      console.log("================================");
+    });
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB Connection Error:", err);
+    process.exit(1);
+  });
