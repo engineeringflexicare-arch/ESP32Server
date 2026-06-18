@@ -1,0 +1,27 @@
+{
+  "name": "esp32mongodbserver",
+  "version": "1.0.0",
+  "description": "ESP32 MongoDB Server",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "esp32",
+    "mongodb",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

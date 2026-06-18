@@ -1,0 +1,36 @@
+# Dependencies (ප්‍රමාණය විශාල බැවින් Git එකට නොයවයි)
+node_modules/
+jspm_packages/
+
+# Environment Variables (රහස්‍ය දත්ත සහ Keys අඩංගු බැවින් අනිවාර්යයෙන්ම සඟවයි)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs (Error සහ Debug logs)
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Diagnostic reports (Crashed logs)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# IDEs and Editors (ඔබ කේතය ලියන මෘදුකාංග වල සැකසුම්)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
