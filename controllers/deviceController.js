@@ -160,13 +160,46 @@ const getDeviceLogs = async (req, res) => {
 };
 
 // ==========================================
-// Exports
+// Clear Device Logs
 // ==========================================
 
+const clearDeviceLogs = async (req, res) => {
+  try {
+    const deviceId = req.query.device_id;
+    let query = {};
+
+    // Specific device ID එකක් තියෙනවා නම්, ඒ අදාළ device එකේ logs පමණක් delete කරයි.
+    // නැත්නම් database එකේ තියෙන සියලුම logs delete කරයි.
+    if (deviceId) {
+      query.deviceId = deviceId;
+    }
+
+    const result = await LogEvent.deleteMany(query);
+
+    res.status(200).json({
+      success: true,
+      message: "Logs cleared successfully",
+      deletedCount: result.deletedCount, // Delete වුණු ප්‍රමාණය
+    });
+  } catch (error) {
+    console.error("Error clearing logs:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// ==========================================
+// Exports
+// ==========================================
 module.exports = {
   getConfig,
   getAllConfigs,
   setConfig,
   logDeviceEvent,
   getDeviceLogs,
+  clearDeviceLogs, // <--- අලුතින් එකතු කළ function එක
 };
