@@ -1,19 +1,21 @@
 const express = require("express");
 
-// clearDeviceLogs එක අලුතින් import කරගන්න
-const { getConfig, getAllConfigs, setConfig, logDeviceEvent, getDeviceLogs, clearDeviceLogs } = require("../controllers/deviceController");
+// Controller එකෙන් අවශ්‍ය සියලුම functions import කරගැනීම
+const { getConfig, getAllConfigs, setConfig, getFirebaseToken, logDeviceEvent, getDeviceLogs, clearDeviceLogs } = require("../controllers/deviceController");
 
 const router = express.Router();
 
+// Configuration Routes
 router.get("/getConfig", getConfig);
 router.get("/configs", getAllConfigs);
-
 router.post("/setConfig", setConfig);
 
+// ESP32 Custom Token Authentication Route (අලුතින් එකතු කළ එක)
+router.post("/getFirebaseToken", getFirebaseToken);
+
+// Logging Routes
 router.post("/logEvent", logDeviceEvent);
 router.get("/logs", getDeviceLogs);
-
-// අලුත් Delete Route එක
 router.delete("/logs", clearDeviceLogs);
 
 module.exports = router;

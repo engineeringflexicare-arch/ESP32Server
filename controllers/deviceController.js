@@ -1,3 +1,15 @@
+const admin = require("firebase-admin");
+const serviceAccount = require("../esp-project-ebe94-firebase-adminsdk-fbsvc-0362b33838.json");
+
+// Firebase Admin SDK එක Initialize කිරීම
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://esp-project-ebe94-default-rtdb.firebaseio.com",
+  });
+  console.log("Firebase Admin SDK initialized successfully!");
+}
+
 const LogEvent = require("../models/LogEvent");
 const ConfigurationModel = require("../models/Configuration");
 
@@ -59,7 +71,7 @@ const getAllConfigs = async (req, res) => {
 
 const setConfig = async (req, res) => {
   try {
-    const { device_id, firebase_api_key, firebase_url, ip_address, gateway, subnet } = req.body;
+    const { device_id, firebase_api_key, firebase_url, ip_address, gateway, subnet, device_secret, firebase_uid } = req.body;
 
     const config = await ConfigurationModel.findOneAndUpdate(
       { device_id },
@@ -70,6 +82,8 @@ const setConfig = async (req, res) => {
         ip_address,
         gateway,
         subnet,
+        device_secret, // ESP32 එකෙන් verify කිරීමට අවශ්‍ය secret එක
+        firebase_uid, // Firebase custom token එකට අවශ්‍ය uid එක
         updatedAt: new Date(),
       },
       {
@@ -86,6 +100,60 @@ const setConfig = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+// ==========================================
+// Get Firebase Custom Token for ESP32 Devices
+// ==========================================
+
+const getFirebaseToken = async (req, res) => {
+  try {
+    const { deviceId, deviceSecret } = req.body;
+
+    if (!deviceId || !deviceSecret) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing deviceId or deviceSecret",
+      });
+    }
+
+    // MongoDB එකෙන් අදාළ ඩිවයිස් එකේ configuration එක ලබා ගැනීම
+    const config = await ConfigurationModel.findOne({ device_id: deviceId });
+
+    if (!config) {
+      return res.status(404).json({
+        success: false,
+        message: "Device configuration not found",
+      });
+    }
+
+    // ඩිවයිස් එකේ secret එක සමාන දැයි පරීක්ෂා කිරීම
+    if (config.device_secret !== deviceSecret) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid device credentials",
+      });
+    }
+
+    // Firebase Custom Token එකක් නිර්මාණය කිරීම
+    const uid = config.firebase_uid || `device-${deviceId.toLowerCase()}`;
+    const customToken = await admin.auth().createCustomToken(uid, {
+      deviceId: deviceId,
+    });
+
+    return res.status(200).json({
+      success: true,
+      token: customToken,
+      expiresIn: "3600s",
+    });
+  } catch (error) {
+    console.error("Error generating custom token:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Token mint failed",
+      error: error.message,
     });
   }
 };
@@ -220,6 +288,7 @@ module.exports = {
   getConfig,
   getAllConfigs,
   setConfig,
+  getFirebaseToken,
   logDeviceEvent,
   getDeviceLogs,
   clearDeviceLogs,

@@ -14,6 +14,14 @@ const configurationSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  device_secret: {
+    type: String,
+    required: true, // ESP32 එකෙන් එවෙන secret එක compare කිරීමට අවශ්‍යයි
+  },
+  firebase_uid: {
+    type: String,
+    required: true, // Firebase Custom Token එක generate කිරීමට අවශ්‍ය unique UID එක
+  },
   updatedAt: {
     type: Date,
     default: Date.now,
