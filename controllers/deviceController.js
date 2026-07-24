@@ -1,17 +1,44 @@
 const admin = require("firebase-admin");
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-
-// Firebase Admin SDK එක Initialize කිරීම
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://esp-project-ebe94-default-rtdb.firebaseio.com",
-  });
-  console.log("Firebase Admin SDK initialized successfully!");
-}
-
 const LogEvent = require("../models/LogEvent");
 const ConfigurationModel = require("../models/Configuration");
+
+// ==========================================
+// Firebase Admin SDK Initialization
+// ==========================================
+
+try {
+  const rawConfig = process.env.FIREBASE_SERVICE_ACCOUNT;
+
+  if (!rawConfig) {
+    console.warn("⚠️ WARNING: FIREBASE_SERVICE_ACCOUNT environment variable is missing!");
+  } else {
+    let serviceAccount;
+
+    // 1. ලබා දී ඇත්තේ .json File name එකක් නම් එය File එකක් ලෙස Load කරගන්න (Local PC සඳහා)
+    if (rawConfig.endsWith(".json")) {
+      // Controllers folder එකේ සිට ප්‍රධාන (root) folder එකට යාමට '../../' භාවිතා කරයි
+      serviceAccount = require(`../${rawConfig}`);
+    }
+    // 2. එසේ නැතිනම් එය JSON එකක් ලෙස Parse කරගන්න (Render වැනි Cloud සඳහා)
+    else {
+      serviceAccount = JSON.parse(rawConfig);
+      if (serviceAccount.private_key) {
+        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+      }
+    }
+
+    // Firebase Initialize කිරීම
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: "https://esp-project-ebe94-default-rtdb.firebaseio.com",
+      });
+      console.log("✅ Firebase Admin SDK initialized successfully!");
+    }
+  }
+} catch (error) {
+  console.error("❌ Firebase Initialization Error:", error.message);
+}
 
 // ==========================================
 // Get Single Config
