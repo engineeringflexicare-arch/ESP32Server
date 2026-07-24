@@ -1,5 +1,5 @@
 const admin = require("firebase-admin");
-const serviceAccount = require("../esp-project-ebe94-firebase-adminsdk-fbsvc-0362b33838.json");
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 // Firebase Admin SDK එක Initialize කිරීම
 if (!admin.apps.length) {
