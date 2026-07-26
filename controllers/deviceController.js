@@ -137,12 +137,14 @@ const setConfig = async (req, res) => {
 
 const getFirebaseToken = async (req, res) => {
   try {
-    const { deviceId, deviceSecret } = req.body;
+    // deviceSecret හෝ secret කුමන එකක් ආවත් එය ලබා ගැනීමට (Fallback to 'secret')
+    const deviceId = req.body.deviceId;
+    const deviceSecret = req.body.deviceSecret || req.body.secret;
 
     if (!deviceId || !deviceSecret) {
       return res.status(400).json({
         success: false,
-        message: "Missing deviceId or deviceSecret",
+        message: "Missing deviceId or deviceSecret/secret",
       });
     }
 
