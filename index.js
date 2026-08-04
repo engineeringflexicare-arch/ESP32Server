@@ -70,7 +70,7 @@ app.use((err, req, res, next) => {
   console.error("❌ Server Error:", err);
 
   res.status(500).json({
-    success: false,
+    success: false,junda
     message: err.message || "Internal Server Error",
   });
 });
